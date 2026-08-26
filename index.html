@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeLink — Critical Care Coordination Platform</title>
+  <meta name="description" content="Right Blood. Right Medicine. Right Time. Dedicated critical-care coordination platform for Thalassemia, Chemotherapy, Blood Reservations, and Caregivers.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- LifeLink Custom Stylesheet -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-header">
+        <div class="brand-icon">
+          <i class="fas fa-heartbeat"></i>
+        </div>
+        <div class="brand-info">
+          <h1>LIFELINK</h1>
+          <div class="brand-tagline">Right Blood • Right Time</div>
+        </div>
+      </div>
+
+      <!-- Quick Role Switcher -->
+      <div class="role-badge-container">
+        <label for="role-select" style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; display: block;">Active Portal Role</label>
+        <select class="role-switcher-select" id="role-select">
+          <option value="PATIENT">Patient View (Srijan • B+)</option>
+          <option value="BLOOD_BANK">Blood Bank Portal (ABC Blood Bank)</option>
+          <option value="CAREGIVER">Caregiver Mode (Anita Roy)</option>
+          <option value="ADMIN">System Administrator</option>
+        </select>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu">
+        <div class="nav-section-title">Patient Care Coordination</div>
+        
+        <div class="nav-item active" data-tab="home" id="nav-home">
+          <i class="fas fa-home"></i>
+          <span>Home Dashboard</span>
+        </div>
+
+        <div class="nav-item" data-tab="blood" id="nav-blood">
+          <i class="fas fa-search-location"></i>
+          <span>Find Blood & Map</span>
+        </div>
+
+        <div class="nav-item" data-tab="reservations" id="nav-reservations">
+          <i class="fas fa-clipboard-list"></i>
+          <span>My Reservations</span>
+        </div>
+
+        <div class="nav-item" data-tab="treatments" id="nav-treatments">
+          <i class="fas fa-calendar-check"></i>
+          <span>Transfusion & Chemo</span>
+        </div>
+
+        <div class="nav-item" data-tab="medicines" id="nav-medicines">
+          <i class="fas fa-pills"></i>
+          <span>Medicine Tracker</span>
+        </div>
+
+        <div class="nav-item" data-tab="critical-medicines" id="nav-critical">
+          <i class="fas fa-shield-virus"></i>
+          <span>Albumin & Critical Meds</span>
+        </div>
+
+        <div class="nav-item" data-tab="caregivers" id="nav-caregivers">
+          <i class="fas fa-user-friends"></i>
+          <span>Caregiver Mode</span>
+        </div>
+
+        <div class="nav-section-title role-nav" data-roles="BLOOD_BANK,ADMIN">Blood Bank Operations</div>
+
+        <div class="nav-item role-nav" data-roles="BLOOD_BANK,ADMIN" data-tab="bloodbank-requests" id="nav-bb-requests">
+          <i class="fas fa-inbox"></i>
+          <span>Reservation Requests</span>
+          <span class="badge" id="bb-requests-badge">New</span>
+        </div>
+
+        <div class="nav-item role-nav" data-roles="BLOOD_BANK,ADMIN" data-tab="bloodbank-inventory" id="nav-bb-inventory">
+          <i class="fas fa-boxes"></i>
+          <span>Manage Inventory</span>
+        </div>
+
+        <div class="nav-section-title">Assistant & Alerts</div>
+
+        <div class="nav-item" onclick="window.app.openAISummaryModal()" id="nav-ai-summary">
+          <i class="fas fa-robot" style="color: #8338ec;"></i>
+          <span>AI Care Summary</span>
+        </div>
+
+        <div class="nav-item" data-tab="notifications" id="nav-notifications">
+          <i class="fas fa-bell"></i>
+          <span>Notifications</span>
+          <span class="badge" id="nav-notif-badge" style="display: none;">0</span>
+        </div>
+      </nav>
+
+      <!-- Sidebar User Profile Footer -->
+      <div class="sidebar-footer">
+        <div class="user-mini-profile">
+          <div class="user-avatar" id="sidebar-user-avatar">S</div>
+          <div class="user-details">
+            <div class="name" id="sidebar-user-name">Srijan</div>
+            <div class="role-text" id="sidebar-user-role">Patient • Thalassemia (B+)</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+
+      <!-- Killer Demo Action Banner (PDF Pages 10-11 & 14) -->
+      <div class="killer-demo-bar" id="killer-demo-bar">
+        <div class="demo-left">
+          <span class="demo-chip"><i class="fas fa-play-circle"></i> Hackathon Pitch</span>
+          <span><b>Killer Demo:</b> End-to-End Blood Search &rarr; Reservation (PENDING) &rarr; Blood Bank Acceptance &rarr; Real-Time Alert</span>
+        </div>
+        <button class="btn-killer-demo" onclick="window.killerDemo.startDemo()">
+          <i class="fas fa-bolt"></i> Run Interactive Demo
+        </button>
+      </div>
+
+      <!-- Top Sticky Navbar -->
+      <header class="top-navbar">
+        <div class="nav-title-area">
+          <h2>
+            <i class="fas fa-shield-alt" style="color: var(--accent-blood);"></i>
+            <span>LifeLink Critical Care</span>
+          </h2>
+        </div>
+
+        <div class="nav-actions">
+          <button class="btn btn-secondary btn-sm" onclick="window.app.openAISummaryModal()">
+            <i class="fas fa-magic" style="color: #8338ec;"></i> AI Daily Brief
+          </button>
+          <button class="btn-icon" id="theme-toggle-btn" title="Toggle Dark/Light Mode">
+            <i class="fas fa-sun" id="theme-toggle-icon"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="content-area">
+
+        <!-- ====================================================================
+             TAB 1: PATIENT HOME DASHBOARD (PDF Page 7)
+             ==================================================================== -->
+        <section class="tab-content active" id="tab-home">
+          
+          <div class="grid-dashboard-hero">
+            <!-- Next Care Task Card (PDF Page 7 Specification) -->
+            <div class="card hero-task-card">
+              <div class="hero-tag"><i class="fas fa-exclamation-circle"></i> NEXT CARE TASK</div>
+              <h2 class="hero-task-title" id="hero-transfusion-title">Blood Transfusion (B+ • 2 Units)</h2>
+              <div class="hero-task-meta" id="hero-transfusion-meta">
+                <span><i class="fas fa-calendar-day"></i> 05 September 2026</span>
+                <span>•</span>
+                <span><i class="fas fa-hospital"></i> Calcutta Medical Research Institute</span>
+              </div>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <span class="blood-badge" id="hero-blood-badge">B+</span>
+                <button class="btn btn-primary" onclick="window.app.switchTab('blood')">
+                  <i class="fas fa-search"></i> Arrange Blood
+                </button>
+                <button class="btn btn-secondary" onclick="window.app.switchTab('treatments')">
+                  <i class="fas fa-calendar-alt"></i> View Schedule
+                </button>
+              </div>
+            </div>
+
+            <!-- AI Quick Care Card -->
+            <div class="card ai-summary-box">
+              <div class="ai-header-badge">
+                <i class="fas fa-sparkles"></i> AI Care Assistant
+              </div>
+              <h3 style="font-size: 16px; margin-bottom: 8px;">Good Evening, Srijan</h3>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+                You have <b>3 critical care milestones</b> approaching. Blood reservation for your 05 Sep transfusion can be requested in 1-click.
+              </p>
+              <button class="btn btn-secondary btn-sm" onclick="window.app.openAISummaryModal()">
+                <i class="fas fa-robot"></i> Open Morning/Daily Brief
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Actions Grid (PDF Page 7) -->
+          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">
+            Quick Actions
+          </h3>
+          <div class="grid-4" style="margin-bottom: 32px;">
+            <div class="quick-action-card" data-action="find-blood">
+              <div class="quick-action-icon"><i class="fas fa-tint"></i></div>
+              <div class="quick-action-title">Find Blood</div>
+              <div class="quick-action-desc">Live verified inventory across regional blood banks</div>
+            </div>
+
+            <div class="quick-action-card" data-action="medicines">
+              <div class="quick-action-icon"><i class="fas fa-pills"></i></div>
+              <div class="quick-action-title">Medicines</div>
+              <div class="quick-action-desc">Stock calculations, dose reminders & supply tracking</div>
+            </div>
+
+            <div class="quick-action-card" data-action="treatment">
+              <div class="quick-action-icon"><i class="fas fa-heartbeat"></i></div>
+              <div class="quick-action-title">Treatment</div>
+              <div class="quick-action-desc">Thalassemia 21-day cycles & Chemotherapy milestones</div>
+            </div>
+
+            <div class="quick-action-card" data-action="caregiver">
+              <div class="quick-action-icon"><i class="fas fa-user-shield"></i></div>
+              <div class="quick-action-title">Caregiver</div>
+              <div class="quick-action-desc">Sync alerts and reservation updates with family</div>
+            </div>
+          </div>
+
+          <!-- Upcoming Timeline (PDF Page 7) -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-clock" style="color: var(--accent-blood);"></i>
+                <span>Upcoming Care Schedule</span>
+              </div>
+            </div>
+            <div class="timeline" id="upcoming-tasks-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================================
+             TAB 2: FIND BLOOD & INTERACTIVE MAP (PDF Pages 5, 7, 9, 10)
+             ==================================================================== -->
+        <section class="tab-content" id="tab-blood">
+          <div class="card-header">
+            <h2 style="font-size: 22px;">Blood Search & Real-Time Availability</h2>
+          </div>
+
+          <div class="search-controls-bar">
+            <div class="form-group">
+              <label for="search-blood-group">Blood Group</label>
+              <select class="form-control" id="search-blood-group">
+                <option value="B+" selected>B+ (Positive)</option>
+                <option value="O+">O+ (Positive)</option>
+                <option value="O-">O- (Universal Donor)</option>
+                <option value="A+">A+ (Positive)</option>
+                <option value="A-">A- (Negative)</option>
+                <option value="B-">B- (Negative)</option>
+                <option value="AB+">AB+ (Universal Recipient)</option>
+                <option value="AB-">AB- (Negative)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="search-component">Component</label>
+              <select class="form-control" id="search-component">
+                <option value="PRBC" selected>Packed Red Blood Cells (PRBC)</option>
+                <option value="PLATELETS">Platelet Concentrate (RDP/SDP)</option>
+                <option value="FFP">Fresh Frozen Plasma (FFP)</option>
+                <option value="WHOLE_BLOOD">Whole Blood</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="search-location">City / District</label>
+              <input type="text" class="form-control" id="search-location" value="Kolkata, West Bengal">
+            </div>
+
+            <button class="btn btn-primary" id="btn-search-blood" style="height: 42px;">
+              <i class="fas fa-search"></i> Search Availability
+            </button>
+          </div>
+
+          <div class="map-and-results-layout">
+            <!-- Leaflet Interactive Map -->
+            <div id="leaflet-map"></div>
+
+            <!-- Blood Bank List -->
+            <div class="results-scroll-container" id="blood-results-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 3: MY RESERVATIONS (PDF Page 7)
+             ==================================================================== -->
+        <section class="tab-content" id="tab-reservations">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-clipboard-list" style="color: var(--accent-blood);"></i>
+                <span>My Blood Reservation Requests</span>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="window.app.switchTab('blood')">
+                <i class="fas fa-plus"></i> New Blood Request
+              </button>
+            </div>
+            <div id="my-reservations-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 4: BLOOD BANK MANAGER PORTAL (PDF Pages 6, 7, 10, 11)
+             ==================================================================== -->
+        <section class="tab-content" id="tab-bloodbank-requests">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-inbox" style="color: var(--accent-cyan);"></i>
+                <span>ABC Blood Bank — Inbound Reservation Requests</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="window.app.renderBloodBankRequests()">
+                <i class="fas fa-sync"></i> Refresh Requests
+              </button>
+            </div>
+            <div id="bb-requests-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-content" id="tab-bloodbank-inventory">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-boxes" style="color: var(--accent-blue);"></i>
+                <span>ABC Blood Bank — Live Inventory Management</span>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Blood Group</th>
+                  <th>Component</th>
+                  <th>Units In Stock</th>
+                  <th>Last Updated</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="bb-inventory-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 5: TRANSFUSION & CHEMOTHERAPY TRACKERS (PDF Pages 7-8)
+             ==================================================================== -->
+        <section class="tab-content" id="tab-treatments">
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-calendar-check" style="color: var(--accent-blood);"></i>
+                <span>Treatment & Transfusion Protocols</span>
+              </div>
+            </div>
+            <div id="treatments-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 6: MEDICINE TRACKER & STOCK CALCULATOR (PDF Page 8)
+             ==================================================================== -->
+        <section class="tab-content" id="tab-medicines">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-pills" style="color: var(--accent-blue);"></i>
+                <span>Medicine Tracker & Smart Stock Depletion Formula</span>
+              </div>
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; background: var(--bg-tertiary); padding: 12px 16px; border-radius: var(--radius-md);">
+              <i class="fas fa-calculator"></i> <b>Stock Calculation:</b> <code>Remaining = Initial Quantity - (Daily Units × Days Elapsed)</code>. Automatically notifies patient and caregiver when supply falls below 5 days.
+            </div>
+            <div id="medicines-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 7: CRITICAL MEDICINE / ALBUMIN TRACKER (PDF Page 8 Section 12)
+             ==================================================================== -->
+        <section class="tab-content" id="tab-critical-medicines">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-shield-virus" style="color: #8338ec;"></i>
+                <span>Critical Medicine & Albumin 20% Availability</span>
+              </div>
+            </div>
+            <div class="search-controls-bar" style="margin-bottom: 18px;">
+              <div class="form-group" style="flex: 2;">
+                <label for="critical-med-search">Search Critical Infusions / Rare Drugs</label>
+                <input type="text" class="form-control" id="critical-med-search" placeholder="e.g. Albumin 20%, IVIG..." value="Albumin 20%">
+              </div>
+              <button class="btn btn-primary" onclick="window.app.renderCriticalMedicines()" style="height: 42px;">
+                <i class="fas fa-search"></i> Check Pharmacy Stock
+              </button>
+            </div>
+            <div id="critical-medicines-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 8: CAREGIVER PORTAL (PDF Page 8, 9)
+             ==================================================================== -->
+        <section class="tab-content" id="tab-caregivers">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-user-friends" style="color: var(--accent-cyan);"></i>
+                <span>Caregiver Mode & Shared Safety Network</span>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="document.getElementById('caregiver-modal').classList.add('active')">
+                <i class="fas fa-user-plus"></i> Invite Caregiver
+              </button>
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 18px;">
+              Linked caregivers receive automated push notifications for critical care updates, low medicine supplies, and blood reservation statuses.
+            </div>
+            <div id="caregivers-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 9: NOTIFICATIONS INBOX (PDF Page 4, 9)
+             ==================================================================== -->
+        <section class="tab-content" id="tab-notifications">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-bell" style="color: var(--accent-blood);"></i>
+                <span>Live Notifications & Alerts Feed</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="window.app.markAllNotificationsRead()">
+                <i class="fas fa-check-double"></i> Mark All as Read
+              </button>
+            </div>
+            <div id="notifications-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ====================================================================
+       MODALS & FLOATING OVERLAYS
+       ==================================================================== -->
+
+  <!-- 1. Blood Reservation Modal -->
+  <div class="modal-backdrop" id="reservation-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="window.app.closeReservationModal()">&times;</button>
+      <div class="card-title" style="margin-bottom: 6px;">
+        <i class="fas fa-tint" style="color: var(--accent-blood);"></i>
+        <span>Request Blood Reservation</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;" id="res-modal-bank-name">
+        ABC Blood Bank & Research Centre
+      </p>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="res-modal-group">Blood Group</label>
+        <input type="text" class="form-control" id="res-modal-group" value="B+" readonly>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="res-modal-component">Blood Component</label>
+        <input type="text" class="form-control" id="res-modal-component" value="PRBC" readonly>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="res-modal-units">Units Required</label>
+        <input type="number" class="form-control" id="res-modal-units" value="2" min="1" max="10">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="res-modal-date">Date Required</label>
+        <input type="text" class="form-control" id="res-modal-date" value="05 September 2026">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="res-modal-hospital">Hospital Name</label>
+        <input type="text" class="form-control" id="res-modal-hospital" value="Calcutta Medical Research Institute">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label for="res-modal-notes">Patient Notes</label>
+        <textarea class="form-control" id="res-modal-notes" rows="2">Regular 21-day transfusion cycle.</textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary" onclick="window.app.closeReservationModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="window.app.submitReservation()">
+          <i class="fas fa-paper-plane"></i> Submit Request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. AI Summary Modal (PDF Pages 9 & 13) -->
+  <div class="modal-backdrop" id="ai-summary-modal">
+    <div class="modal-card" style="width: 600px;">
+      <button class="modal-close" onclick="window.app.closeAISummaryModal()">&times;</button>
+      <div id="ai-summary-modal-content">
+        <!-- Rendered dynamically -->
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 18px;">
+        <button class="btn btn-secondary" onclick="window.app.closeAISummaryModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Invite Caregiver Modal -->
+  <div class="modal-backdrop" id="caregiver-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="document.getElementById('caregiver-modal').classList.remove('active')">&times;</button>
+      <div class="card-title" style="margin-bottom: 18px;">
+        <i class="fas fa-user-plus" style="color: var(--accent-cyan);"></i>
+        <span>Invite Caregiver</span>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="cg-name">Caregiver Full Name</label>
+        <input type="text" class="form-control" id="cg-name" placeholder="e.g. Anita Roy">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="cg-relationship">Relationship</label>
+        <select class="form-control" id="cg-relationship">
+          <option value="Mother">Mother</option>
+          <option value="Father">Father</option>
+          <option value="Spouse">Spouse</option>
+          <option value="Sibling">Sibling</option>
+          <option value="Primary Guardian">Primary Guardian</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label for="cg-phone">Phone Number</label>
+        <input type="tel" class="form-control" id="cg-phone" placeholder="+91 98311 88990">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label for="cg-email">Email (Optional)</label>
+        <input type="email" class="form-control" id="cg-email" placeholder="anita@example.com">
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary" onclick="document.getElementById('caregiver-modal').classList.remove('active')">Cancel</button>
+        <button class="btn btn-primary" onclick="window.app.addCaregiverFromModal()">
+          <i class="fas fa-link"></i> Link Caregiver
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Interactive Killer Demo Stepper Floating Bar -->
+  <div class="demo-stepper-overlay" id="demo-stepper-overlay">
+    <div class="demo-stepper-header">
+      <div class="demo-stepper-title">
+        <i class="fas fa-bolt"></i>
+        <span id="demo-step-title">Step 1: Patient Login</span>
+      </div>
+      <span style="font-size: 11px; color: var(--text-muted);" id="demo-step-counter">Step 1 of 8</span>
+    </div>
+    <div class="demo-step-text" id="demo-step-desc">
+      Executing automated hackathon demonstration step...
+    </div>
+    <div class="demo-stepper-actions">
+      <button class="btn btn-secondary btn-sm" onclick="window.killerDemo.prevStep()">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="window.killerDemo.nextStep()">
+        Next Step <i class="fas fa-arrow-right"></i>
+      </button>
+      <button class="btn btn-secondary btn-sm" onclick="window.killerDemo.stopDemo()">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/state.js"></script>
+  <script src="/static/js/map.js"></script>
+  <script src="/static/js/killer_demo.js"></script>
+  <script src="/static/js/app.js"></script>
+
+</body>
+</html>
