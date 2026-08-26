@@ -73,13 +73,6 @@ class KillerDemoRunner {
           window.app.switchTab('home');
           await window.app.loadNotifications();
         }
-      },
-      {
-        title: "Step 8: AI Care Assistant Summary Updated",
-        desc: "AI Care Assistant summarizes the day's tasks safely, verifying the blood reservation is confirmed for the 05 Sep transfusion!",
-        action: async () => {
-          window.app.openAISummaryModal();
-        }
       }
     ];
   }

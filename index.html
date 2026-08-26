@@ -99,12 +99,14 @@
           <span>Manage Inventory</span>
         </div>
 
-        <div class="nav-section-title">Assistant & Alerts</div>
+        <div class="nav-section-title">Alerts & Notifications</div>
 
+        <!-- AI Care Summary disabled
         <div class="nav-item" onclick="window.app.openAISummaryModal()" id="nav-ai-summary">
           <i class="fas fa-robot" style="color: #8338ec;"></i>
           <span>AI Care Summary</span>
         </div>
+        -->
 
         <div class="nav-item" data-tab="notifications" id="nav-notifications">
           <i class="fas fa-bell"></i>
@@ -149,9 +151,11 @@
         </div>
 
         <div class="nav-actions">
+          <!-- AI Daily Brief button disabled
           <button class="btn btn-secondary btn-sm" onclick="window.app.openAISummaryModal()">
             <i class="fas fa-magic" style="color: #8338ec;"></i> AI Daily Brief
           </button>
+          -->
           <button class="btn-icon" id="theme-toggle-btn" title="Toggle Dark/Light Mode">
             <i class="fas fa-sun" id="theme-toggle-icon"></i>
           </button>
@@ -186,18 +190,20 @@
               </div>
             </div>
 
-            <!-- AI Quick Care Card -->
+            <!-- Care Status Card -->
             <div class="card ai-summary-box">
               <div class="ai-header-badge">
-                <i class="fas fa-sparkles"></i> AI Care Assistant
+                <i class="fas fa-heartbeat"></i> Daily Care Status
               </div>
               <h3 style="font-size: 16px; margin-bottom: 8px;">Good Evening, Srijan</h3>
               <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
                 You have <b>3 critical care milestones</b> approaching. Blood reservation for your 05 Sep transfusion can be requested in 1-click.
               </p>
+              <!-- AI Care Summary button disabled
               <button class="btn btn-secondary btn-sm" onclick="window.app.openAISummaryModal()">
                 <i class="fas fa-robot"></i> Open Morning/Daily Brief
               </button>
+              -->
             </div>
           </div>
 
@@ -531,18 +537,18 @@
     </div>
   </div>
 
-  <!-- 2. AI Summary Modal (PDF Pages 9 & 13) -->
+  <!-- 2. AI Summary Modal (Disabled/Hidden)
   <div class="modal-backdrop" id="ai-summary-modal">
     <div class="modal-card" style="width: 600px;">
       <button class="modal-close" onclick="window.app.closeAISummaryModal()">&times;</button>
       <div id="ai-summary-modal-content">
-        <!-- Rendered dynamically -->
       </div>
       <div style="display: flex; justify-content: flex-end; margin-top: 18px;">
         <button class="btn btn-secondary" onclick="window.app.closeAISummaryModal()">Close</button>
       </div>
     </div>
   </div>
+  -->
 
   <!-- 3. Invite Caregiver Modal -->
   <div class="modal-backdrop" id="caregiver-modal">
